@@ -10,7 +10,6 @@
 
 """
 import os
-import bz2
 import stat
 import fcntl
 import glob
@@ -38,6 +37,7 @@ from entropy.db.skel import EntropyRepositoryBase
 from entropy.db.exceptions import Error as EntropyRepositoryError
 from entropy.cache import EntropyCacher
 from entropy.misc import FlockFile
+from entropy.compression import EntropyBZ2File
 from entropy.fetchers import UrlFetcher
 from entropy.client.interfaces.db import ClientEntropyRepositoryPlugin, \
     InstalledPackagesRepository, AvailablePackagesRepository, GenericRepository
@@ -844,7 +844,7 @@ class RepositoryMixin:
             # unbzip2
             tmp_fd, tmp_path = const_mkstemp(dir = db_dir)
             try:
-                entropy.tools.uncompress_file(dbfile, tmp_path, bz2.BZ2File)
+                entropy.tools.uncompress_file(dbfile, tmp_path, EntropyBZ2File)
             finally:
                 os.close(tmp_fd)
             os.rename(tmp_path, dbfile)
@@ -1266,7 +1266,7 @@ class RepositoryMixin:
                 header = blue(" @@ "),
                 back = True
             )
-        f_out = bz2.BZ2File(comp_backup_path, "wb")
+        f_out = EntropyBZ2File(comp_backup_path, "wb")
         try:
             repo_db.exportRepository(f_out)
         except DatabaseError as err:
@@ -1318,7 +1318,7 @@ class RepositoryMixin:
         uncompressed_backup_path = backup_path[:-len(".bz2")]
         try:
             entropy.tools.uncompress_file(backup_path, uncompressed_backup_path,
-                bz2.BZ2File)
+                EntropyBZ2File)
         except (IOError, OSError):
             if not silent:
                 entropy.tools.print_traceback()

@@ -11,7 +11,6 @@
 """
 import os
 import errno
-import bz2
 import hashlib
 import shlex
 import stat
@@ -37,6 +36,7 @@ from entropy.output import darkred, darkgreen, brown, darkblue, teal, \
 from entropy.i18n import _
 from entropy.core.settings.base import SystemSettings
 from entropy.misc import LogFile, ParallelTask
+from entropy.compression import EntropyBZ2File
 from entropy.spm.plugins.skel import SpmPlugin
 import entropy.dep
 import entropy.tools
@@ -2359,7 +2359,7 @@ class PortagePlugin(SpmPlugin):
         bz2envfile = os.path.join(ebuild_path, PortagePlugin.ENV_FILE_COMP)
         if os.path.isfile(bz2envfile) and os.path.isdir(myroot):
             envfile = entropy.tools.unpack_bzip2(bz2envfile)
-            bzf = bz2.BZ2File(bz2envfile, "w")
+            bzf = EntropyBZ2File(bz2envfile, "w")
             with open(envfile, "rb") as f:
                 line = f.readline()
                 root_tag = const_convert_to_rawstring("ROOT=")
@@ -3579,7 +3579,7 @@ class PortagePlugin(SpmPlugin):
             try:
 
                 # read env file
-                bz_f = bz2.BZ2File(env_file, "r")
+                bz_f = EntropyBZ2File(env_file, "r")
 
                 for line in bz_f.readlines():
                     if not line.startswith(lc_all_str):

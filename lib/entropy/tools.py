@@ -28,8 +28,6 @@ import pwd
 import hashlib
 import random
 import traceback
-import gzip
-import bz2
 import mmap
 import codecs
 import struct
@@ -40,6 +38,7 @@ from entropy.const import etpConst, const_kill_threads, const_islive, \
     const_israwstring, const_secure_config_file, const_is_python3, \
     const_mkstemp, const_file_readable
 from entropy.exceptions import FileNotFound, InvalidAtom, DirectoryNotFound
+from entropy.compression import EntropyBZ2File, EntropyGzipFile
 
 
 _READ_SIZE = 1024000
@@ -1183,7 +1182,7 @@ def unpack_gzip(gzipfilepath):
     fd, tmp_path = const_mkstemp(
         prefix="unpack_gzip.", dir=os.path.dirname(filepath))
     with os.fdopen(fd, "wb") as item:
-        filegz = gzip.GzipFile(gzipfilepath, "rb")
+        filegz = EntropyGzipFile(gzipfilepath, "rb")
         chunk = filegz.read(_READ_SIZE)
         while chunk:
             item.write(chunk)
@@ -1206,7 +1205,7 @@ def unpack_bzip2(bzip2filepath):
         prefix="unpack_bzip2.",
         dir=os.path.dirname(filepath))
     with os.fdopen(fd, "wb") as item:
-        filebz2 = bz2.BZ2File(bzip2filepath, "rb")
+        filebz2 = EntropyBZ2File(bzip2filepath, "rb")
         chunk = filebz2.read(_READ_SIZE)
         while chunk:
             item.write(chunk)
@@ -1237,7 +1236,7 @@ def generate_entropy_delta_file_name(pkg_name_a, pkg_name_b, hash_tag):
 
 def _delta_extract_bz2(bz2_path, new_path_fd):
     with os.fdopen(new_path_fd, "wb") as item:
-        filebz2 = bz2.BZ2File(bz2_path, "rb")
+        filebz2 = EntropyBZ2File(bz2_path, "rb")
         chunk = filebz2.read(_READ_SIZE)
         while chunk:
             item.write(chunk)
@@ -1246,7 +1245,7 @@ def _delta_extract_bz2(bz2_path, new_path_fd):
 
 def _delta_extract_gzip(gzip_path, new_path_fd):
     with os.fdopen(new_path_fd, "wb") as item:
-        file_gz = gzip.GzipFile(gzip_path, "rb")
+        file_gz = EntropyGzipFile(gzip_path, "rb")
         chunk = file_gz.read(_READ_SIZE)
         while chunk:
             item.write(chunk)
@@ -1260,8 +1259,8 @@ _DELTA_DECOMPRESSION_MAP = {
     "gz": _delta_extract_gzip,
 }
 _DELTA_COMPRESSION_MAP = {
-    "bz2": "bz2.BZ2File",
-    "gzip": "gzip.GzipFile",
+    "bz2": "EntropyBZ2File",
+    "gzip": "EntropyGzipFile",
 }
 _DEFAULT_PKG_COMPRESSION = "bz2"
 

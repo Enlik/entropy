@@ -37,8 +37,6 @@ import codecs
 import stat
 import errno
 import signal
-import gzip
-import bz2
 import grp
 import pwd
 import tempfile
@@ -50,6 +48,7 @@ except ImportError:
     # python 3.x
     import _thread as thread
 from entropy.i18n import _, ENCODING, RAW_ENCODING
+from entropy.compression import EntropyBZ2File, EntropyGzipFile
 
 # Setup debugger hook on SIGUSR1
 def debug_signal(signum, frame):
@@ -412,12 +411,12 @@ def const_default_settings(rootdir):
         # Entropy compressed databases format support
         'etpdatabasesupportedcformats': ["bz2", "gz"],
         'etpdatabasecompressclasses': {
-            "bz2": (bz2.BZ2File, "unpack_bzip2", "etpdatabasefilebzip2",
+            "bz2": (EntropyBZ2File, "unpack_bzip2", "etpdatabasefilebzip2",
                 "etpdatabasedumpbzip2", "etpdatabasedumphashfilebz2",
                 "etpdatabasedumplightbzip2", "etpdatabasedumplighthashfilebz2",
                 "etpdatabasefilebzip2light", "etpdatabasefilehashbzip2light",
                 "etpdatabasefilebzip2hash",),
-            "gz": (gzip.GzipFile, "unpack_gzip", "etpdatabasefilegzip",
+            "gz": (EntropyGzipFile, "unpack_gzip", "etpdatabasefilegzip",
                 "etpdatabasedumpgzip", "etpdatabasedumphashfilegzip",
                 "etpdatabasedumplightgzip", "etpdatabasedumplighthashfilegzip",
                 "etpdatabasefilegziplight", "etpdatabasefilehashgziplight",

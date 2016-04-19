@@ -3,7 +3,6 @@
 
 import os
 import sys
-import bz2
 import tempfile
 # so that time function with use american locale
 for env in ("LANG", "LC_ALL", "LANGUAGE",):
@@ -15,6 +14,7 @@ import calendar
 sys.path.insert(0, "../lib")
 from entropy.const import etpConst
 from entropy.client.interfaces import Client
+from entropy.compression import EntropyBZ2File
 import entropy.tools
 import entropy.dep
 
@@ -115,7 +115,7 @@ def _generate_statistics(entropy_client, machine, repository_id, branch,
             etpConst['changelog_filename_compressed'])
 
         entropy.tools.uncompress_file(compressed_changelog_file,
-            changelog_file, bz2.BZ2File)
+            changelog_file, EntropyBZ2File)
 
         target_month = int(os.getenv("ETP_M", int(time.strftime("%m")) - 1))
         target_year = int(os.getenv("ETP_Y", time.strftime("%Y")))

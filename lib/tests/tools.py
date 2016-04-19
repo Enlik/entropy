@@ -9,6 +9,7 @@ from entropy.const import const_convert_to_rawstring, \
 import entropy.tools as et
 from entropy.client.interfaces import Client
 from entropy.output import print_generic, set_mute
+from entropy.compression import EntropyBZ2File
 import tests._misc as _misc
 import subprocess
 import shutil
@@ -227,14 +228,13 @@ class ToolsTest(unittest.TestCase):
 
     def test_XXcompress_file(self):
 
-        import bz2
         fd, tmp_path = const_mkstemp()
         os.write(fd, const_convert_to_rawstring("this is the life"))
         os.fsync(fd)
         orig_md5 = et.md5sum(tmp_path)
 
         new_path = tmp_path + ".bz2"
-        opener = bz2.BZ2File
+        opener = EntropyBZ2File
         et.compress_file(tmp_path, new_path, opener)
 
         comp_md5 = "69b9fc26f7cb561a067a10b06d890242"
@@ -266,10 +266,9 @@ class ToolsTest(unittest.TestCase):
         os.remove(new_path)
 
     def test_unpack_bzip2(self):
-        import bz2
         fd, tmp_path = const_mkstemp(suffix = ".bz2")
 
-        gz_f = bz2.BZ2File(tmp_path, "wb")
+        gz_f = EntropyBZ2File(tmp_path, "wb")
         gz_f.write(const_convert_to_rawstring("ciao ciao ciao"))
         gz_f.close()
 

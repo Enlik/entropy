@@ -16,11 +16,11 @@ from entropy.const import etpSys
 etpSys['unittest'] = True
 
 from tests import locks, db, client, server, misc, fetchers, tools, dep, \
-    i18n, spm, qa, core, security, const
+    i18n, spm, qa, core, security, const, compression
 
 # Add to the list the module to test
 mods = [locks, db, client, server, misc, fetchers, tools, dep, i18n, spm, qa,
-        core, security, const]
+        core, security, const, compression]
 
 tests = []
 for mod in mods:

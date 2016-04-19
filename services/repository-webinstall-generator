@@ -7,7 +7,6 @@ import time
 import os
 import tempfile
 import errno
-import bz2
 
 from entropy.i18n import _
 from entropy.output import print_info, blue, teal, brown, darkgreen, purple, \
@@ -17,6 +16,7 @@ from entropy.client.interfaces.db import GenericRepository
 from entropy.qa import QAInterface
 from entropy.core.settings.base import SystemSettings
 from entropy.exceptions import EntropyException
+from entropy.compression import EntropyBZ2File
 
 from entropy.const import const_convert_to_rawstring, etpConst
 from entropy.locks import SimpleFileLock
@@ -327,7 +327,7 @@ exit ${?}
                 compressed_fd, compressed_tmp_path = tempfile.mkstemp(
                         suffix="repo-webinst-gen")
                 entropy.tools.compress_file(tmp_repo_path,
-                    compressed_tmp_path, bz2.BZ2File)
+                    compressed_tmp_path, EntropyBZ2File)
                 try:
                     os.rename(compressed_tmp_path, tmp_repo_path)
                 except OSError as err:

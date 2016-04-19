@@ -21,7 +21,6 @@ import errno
 import os
 import shutil
 import time
-import bz2
 import codecs
 import threading
 
@@ -33,6 +32,7 @@ from entropy.transceivers import EntropyTransceiver
 from entropy.output import red, darkgreen, bold, brown, blue, darkred, teal, \
     purple
 from entropy.misc import FastRSS
+from entropy.compression import EntropyBZ2File
 from entropy.cache import EntropyCacher
 from entropy.exceptions import OnlineMirrorError
 from entropy.security import Repository as RepositorySecurity
@@ -828,7 +828,7 @@ class ServerPackagesRepositoryUpdater(object):
                 compressed_changelog_name)
             if os.path.isfile(compressed_changelog):
                 entropy.tools.uncompress_file(compressed_changelog,
-                    uncompressed_changelog, bz2.BZ2File)
+                    uncompressed_changelog, EntropyBZ2File)
 
             # unpack metafiles file
             metafiles_path_name = os.path.basename(
@@ -1614,7 +1614,7 @@ Name:    %s
         compressed_changelog = upload_data.get('database_changelog_file')
         if compressed_changelog is not None:
             self._compress_file(uncompressed_changelog,
-                compressed_changelog, bz2.BZ2File)
+                compressed_changelog, EntropyBZ2File)
 
         for uri in uris:
 
