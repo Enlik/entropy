@@ -10,7 +10,8 @@ import unittest
 from entropy.const import const_convert_to_rawstring, \
     const_mkstemp, const_is_python3
 import entropy.tools as et
-from entropy.compression import EntropyBZ2File, EntropyGzipFile
+from entropy.compression import EntropyStandardBZ2File, \
+        EntropyParallelBZ2File, EntropyGzipFile
 
 class CompressionTest(unittest.TestCase):
     """
@@ -44,7 +45,10 @@ class CompressionTest(unittest.TestCase):
                 os.remove(tmp_path)
 
     def test_bzip2_compression_write_method(self):
-        self._do_test_compression_write_method(bz2.decompress, EntropyBZ2File, ".bz2")
+        self._do_test_compression_write_method(bz2.decompress, EntropyStandardBZ2File, ".bz2")
+
+    def test_bzip2parallel_compression_write_method(self):
+        self._do_test_compression_write_method(bz2.decompress, EntropyParallelBZ2File, ".bz2")
 
     def test_gzip_compression_write_method(self):
         # gzip module from Python has no compress/decompress
@@ -81,7 +85,10 @@ class CompressionTest(unittest.TestCase):
         os.remove(tmp_path)
 
     def test_bzip2_unpack_read_method(self):
-        self._do_test_unpack_read_method(bz2.compress, EntropyBZ2File, ".bz2")
+        self._do_test_unpack_read_method(bz2.compress, EntropyStandardBZ2File, ".bz2")
+
+    def test_bzip2parallel_unpack_read_method(self):
+        self._do_test_unpack_read_method(bz2.compress, EntropyParallelBZ2File, ".bz2")
 
     def test_gzip_unpack_read_method(self):
         def _std_compress_gz(data):

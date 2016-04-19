@@ -11,6 +11,7 @@ from entropy.client.interfaces import Client
 from entropy.output import print_generic, set_mute
 from entropy.compression import EntropyBZ2File
 import tests._misc as _misc
+import bz2
 import subprocess
 import shutil
 import stat
@@ -229,7 +230,8 @@ class ToolsTest(unittest.TestCase):
     def test_XXcompress_file(self):
 
         fd, tmp_path = const_mkstemp()
-        os.write(fd, const_convert_to_rawstring("this is the life"))
+        s = const_convert_to_rawstring("this is the life " * 10)
+        os.write(fd, s)
         os.fsync(fd)
         orig_md5 = et.md5sum(tmp_path)
 
@@ -237,10 +239,12 @@ class ToolsTest(unittest.TestCase):
         opener = EntropyBZ2File
         et.compress_file(tmp_path, new_path, opener)
 
-        comp_md5 = "69b9fc26f7cb561a067a10b06d890242"
-        md5 = et.md5sum(new_path)
-        self.assertEqual(md5, comp_md5)
-        os.close(fd)
+        f_new = open(new_path, "rb")
+        compressed = f_new.read()
+        f_new.close()
+
+        self.assertTrue(len(compressed) < len(s))
+        self.assertEqual(s, bz2.decompress(compressed))
 
         et.uncompress_file(new_path, tmp_path, opener)
         self.assertEqual(orig_md5, et.md5sum(tmp_path))
@@ -439,11 +443,36 @@ class ToolsTest(unittest.TestCase):
         self.assertNotEqual(None, delta_path) # missing bsdiff?
         tmp_fd, tmp_path = const_mkstemp()
         os.close(tmp_fd)
-        try:
-            et.apply_entropy_delta(pkg_path_a, delta_path, tmp_path)
-            self.assertEqual(et.md5sum(pkg_path_b), et.md5sum(tmp_path))
-        finally:
-            os.remove(tmp_path)
+
+        et.apply_entropy_delta(pkg_path_a, delta_path, tmp_path)
+        # The compressed part is repacked so checking for exact (bit level)
+        # equality is not possible. (Different compression implementations can
+        # produce different binaries.)
+        #self.assertEqual(et.md5sum(pkg_path_b), et.md5sum(tmp_path))
+        XPAKPACK = const_convert_to_rawstring("XPAKPACK")
+
+        file_b = open(pkg_path_b, "rb")
+        content_b = file_b.read()
+        file_b.close()
+        xpak_index_b = content_b.index(XPAKPACK)
+        pkg_part_b = content_b[:xpak_index_b]
+        pkg_part_unpacked_b = bz2.decompress(pkg_part_b)
+        rest_part_b = content_b[xpak_index_b:]
+
+        file_combined = open(tmp_path, "rb")
+        content_combined = file_combined.read()
+        file_combined.close()
+        xpak_index_combined = content_combined.index(XPAKPACK)
+        pkg_part_combined = content_combined[:xpak_index_combined]
+        pkg_part_unpacked_combined = bz2.decompress(pkg_part_combined)
+        rest_part_combined = content_combined[xpak_index_combined:]
+
+        self.assertEqual(et.md5string(pkg_part_unpacked_b),
+                         et.md5string(pkg_part_unpacked_combined))
+        self.assertEqual(et.md5string(rest_part_b),
+                         et.md5string(rest_part_combined))
+
+        os.remove(tmp_path)
 
     def test_read_elf_class(self):
         elf_obj = _misc.get_dl_so_amd()
