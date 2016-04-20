@@ -386,6 +386,7 @@ class ClientSystemSettingsPlugin(SystemSettingsPlugin):
             'splitdebug': etpConst['splitdebug'],
             'splitdebug_dirs': etpConst['splitdebug_dirs'],
             'multifetch': 1,
+            'bz2threads': -1,
             'collisionprotect': etpConst['collisionprotect'],
             'configprotect': set(),
             'configprotectmask': set(),
@@ -439,6 +440,23 @@ class ClientSystemSettingsPlugin(SystemSettingsPlugin):
                 if bool_setting:
                     data['multifetch'] = 3
 
+        def _bz2threads(setting):
+            int_setting = entropy.tools.setting_to_int(setting, None, None)
+            bool_setting = entropy.tools.setting_to_bool(setting)
+            if int_setting is not None:
+                if int_setting < 2:
+                    data['bz2threads'] = -1 # disabled
+                elif int_setting <= 100:
+                    data['bz2threads'] = int_setting
+                else:
+                    data['bz2threads'] = 0 # autodetect; reasonable default
+            else:
+                if bool_setting is not None:
+                    if bool_setting:
+                        data['bz2threads'] = 0 # autodetect
+                    else:
+                        data['bz2threads'] = -1 # disabled
+
         def _gpg(setting):
             bool_setting = entropy.tools.setting_to_bool(setting)
             if bool_setting is not None:
@@ -485,6 +503,7 @@ class ClientSystemSettingsPlugin(SystemSettingsPlugin):
             'packagehashes': _packagehashes,
             'package-hashes': _packagehashes,
             'multifetch': _multifetch,
+            'bz2-threads': _bz2threads,
             'gpg': _gpg,
             'ignore-spm-downgrades': _spm_downgrades,
             'splitdebug': _splitdebug,
