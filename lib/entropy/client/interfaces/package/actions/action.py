@@ -217,6 +217,9 @@ class PackageAction(object):
         acquired = False
         exit_st = self._run()
         if exit_st != 0:
+            print(self)
+            import traceback
+            traceback.print_stack()
             self._entropy.output(
                 blue(_("An error occurred. Action aborted.")),
                 importance = 2,

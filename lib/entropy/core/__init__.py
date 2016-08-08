@@ -284,6 +284,7 @@ class EntropyPluginFactory:
         available = {}
         pkg_modname = self.__plugin_package_module.__name__
         mod_dir = os.path.dirname(self.__modfile)
+        print("_scan_dir:", pkg_modname, "mod_dir:", mod_dir)
 
         for modname in os.listdir(mod_dir):
 
@@ -303,6 +304,7 @@ class EntropyPluginFactory:
             modname_clean = modname[:-len(EntropyPluginFactory._PLUGIN_SUFFIX)]
 
             modpath = "%s.%s" % (pkg_modname, modname,)
+            print("_scan_dir(this):", modpath)
 
             try:
                 __import__(modpath)
@@ -335,6 +337,7 @@ class EntropyPluginFactory:
 
         for entry in pkg_resources.iter_entry_points(self.__egg_entry_group):
 
+            print("_scan_egg_group:", entry)
             obj = entry.load()
             valid = self._inspect_object(obj)
             if not valid:
@@ -356,11 +359,13 @@ class EntropyPluginFactory:
         if self.__cache is not None:
             return self.__cache.copy()
 
+        print("get_available_plugins(egg_group)", self.__egg_entry_group)
         if self.__egg_entry_group:
             available = self._scan_egg_group()
         else:
             available = self._scan_dir()
 
+        print("get_available_plugins:", available)
         self.__cache = available.copy()
         return available
 
@@ -386,6 +391,7 @@ class EntropyPluginFactory:
         if klass is None:
             raise KeyError
 
+        print("get_default_plugin", klass)
         return klass
 
 
