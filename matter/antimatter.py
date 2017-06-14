@@ -307,6 +307,10 @@ class AntiMatter(object):
         """
         emerge_config = load_emerge_config()
         emerge_settings, emerge_trees, _mtimedb = emerge_config
+        emerge_settings.unlock()
+        emerge_settings['ACCEPT_KEYWORDS'] = "amd64"
+        emerge_settings.lock()
+        print(emerge_settings['ACCEPT_KEYWORDS'])
         settings = portage.config(clone=emerge_settings)
 
         portdb = emerge_trees[settings["ROOT"]]["porttree"].dbapi
@@ -388,7 +392,7 @@ class AntiMatter(object):
         vardb, portdb = self._get_dbs()
         result = []
 
-        vardb.lock()
+        #vardb.lock()
         try:
             cpv_all = vardb.cpv_all()
             cpv_all.sort()
@@ -437,7 +441,8 @@ class AntiMatter(object):
                     best_visible, cmp_res)
                 result.append(pkg)
         finally:
-            vardb.unlock()
+        #    vardb.unlock()
+            pass
 
 
         if cpv_all and self._nsargs.verbose:
